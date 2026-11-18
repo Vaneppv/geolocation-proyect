@@ -1,0 +1,30 @@
+<template id="geo-location-template">
+    <div class="card" part="card">
+        <h2 part="title"><slot name="title">Geolocation</slot></h2>
+
+        <div class="map" id="map-wrapper" part="map">
+            <iframe id="map" part="map-iframe" title="Mapa" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <p class="placeholder" part="placeholder">Pulsa «Ver» para mostrar el mapa</p>
+        </div>
+
+        <div class="fields">
+            <div class="field" part="field">
+                <label part="label" for="longitude"><slot name="label-longitude">longitud</slot></label>
+                <input part="input" id="longitude" name="longitude" type="text" inputmode="decimal" autocomplete="off">
+            </div>
+            <div class="field" part="field">
+                <label part="label" for="latitude"><slot name="label-latitude">latitud</slot></label>
+                <input part="input" id="latitude" name="latitude" type="text" inputmode="decimal" autocomplete="off">
+            </div>
+        </div>
+
+        <label class="toggle" part="toggle">
+            <input type="checkbox" id="auto-follow" part="checkbox">
+            <slot name="label-auto-follow">Seguir mi ubicación automáticamente</slot>
+        </label>
+
+        <button id="view" part="button" type="button"><slot name="label-view">Ver</slot></button>
+
+        <p class="status" id="status" part="status" role="status">Obteniendo ubicación…</p>
+    </div>
+</template>
