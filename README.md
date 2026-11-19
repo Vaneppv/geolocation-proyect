@@ -6,7 +6,7 @@ Componente web (`<geo-location>`) que obtiene la ubicación del usuario con la [
 
 - Custom element autocontenido (`geoLocation.js` + `geoLocation.html` + `geoLocation.css`).
 - Seguimiento continuo de la ubicación con `navigator.geolocation.watchPosition`.
-- Toggle de seguimiento automático (desactivado por defecto).
+- Toggle de seguimiento automático (desactivado por defecto); al activarlo, los inputs de coordenadas se deshabilitan.
 - Entrada manual de longitud y latitud con validación de rangos.
 - Prevención de re-renders cuando la ubicación no cambió.
 - API pública: atributos, métodos, eventos, slots y `::part`.
@@ -43,17 +43,19 @@ Luego abre <http://localhost:8000>. El navegador pedirá permiso de ubicación.
 | Atributo      | Tipo    | Default | Descripción                                                        |
 | ------------- | ------- | ------- | ------------------------------------------------------------------ |
 | `zoom`        | entero  | `15`    | Nivel de zoom del mapa (se limita al rango 1–21).                  |
-| `auto-follow` | booleano| ausente | Si está presente, el mapa sigue automáticamente la ubicación.      |
+| `auto-follow` | booleano| ausente | Si está presente, el mapa sigue automáticamente la ubicación y los inputs se deshabilitan. |
 
 ### Slots
 
-| Slot                   | Texto por defecto                     |
-| ---------------------- | ------------------------------------- |
-| `title`                | `Geolocation`                         |
-| `label-longitude`      | `longitud`                            |
-| `label-latitude`       | `latitud`                             |
-| `label-auto-follow`    | `Seguir mi ubicación automáticamente` |
-| `label-view`           | `Ver`                                 |
+| Slot                   | Texto por defecto                              |
+| ---------------------- | ---------------------------------------------- |
+| `title`                | `Geolocation`                                  |
+| `badge`                | `GPS Ready`                                    |
+| `placeholder`          | `Pulsa «Ver» para cargar tu ubicación en el mapa` |
+| `label-latitude`       | `Latitud`                                      |
+| `label-longitude`      | `Longitud`                                     |
+| `label-auto-follow`    | `Seguir mi ubicación automáticamente`          |
+| `label-view`           | `Ver ubicación`                                |
 
 ### Métodos
 
@@ -92,25 +94,35 @@ geo.addEventListener("location-change", (event) => {
 
 Variables CSS (con fallback en el componente):
 
-| Variable             | Default                          |
-| -------------------- | -------------------------------- |
-| `--geo-width`        | `min(360px, 100%)`               |
-| `--geo-border-color` | `#111827`                        |
-| `--geo-radius`       | `8px`                            |
-| `--geo-background`   | `#ffffff`                        |
-| `--geo-font`         | `system-ui, ...`                 |
-| `--geo-map-aspect`   | `3 / 4`                          |
-| `--geo-accent`       | `#111827`                        |
-| `--geo-text-color`   | `#1f2937`                        |
+| Variable                | Default                          |
+| ----------------------- | -------------------------------- |
+| `--geo-width`           | `420px`                          |
+| `--geo-border-color`    | `#e2e8f0`                        |
+| `--geo-radius`          | `24px`                           |
+| `--geo-control-radius`  | `12px`                           |
+| `--geo-background`      | `#ffffff`                        |
+| `--geo-font`            | `"Inter", system-ui, ...`        |
+| `--geo-map-height`      | `320px`                          |
+| `--geo-accent`          | `#0f766e`                        |
+| `--geo-accent-hover`    | `#115e59`                        |
+| `--geo-accent-soft`     | `#ecfdf5`                        |
+| `--geo-accent-ring`     | `rgba(15, 118, 110, 0.18)`       |
+| `--geo-success`         | `#10b981`                        |
+| `--geo-text-color`      | `#0f172a`                        |
+| `--geo-muted`           | `#64748b`                        |
+| `--geo-surface-2`       | `#f8fafc`                        |
+| `--geo-grid`            | `rgba(15, 118, 110, 0.07)`       |
+| `--geo-shadow`          | `0 20px 25px -5px rgba(...)`     |
 
 ```css
 geo-location {
-  --geo-width: 420px;
-  --geo-border-color: #0ea5e9;
+  --geo-width: 480px;
+  --geo-accent: #059669;
+  --geo-accent-hover: #047857;
 }
 ```
 
-Partes expuestas con `::part`: `card`, `title`, `map`, `map-iframe`, `placeholder`, `field`, `label`, `input`, `toggle`, `checkbox`, `button`, `status`.
+Partes expuestas con `::part`: `card`, `header`, `title`, `icon`, `badge`, `map`, `map-iframe`, `placeholder`, `radar`, `coords`, `field`, `label`, `input`, `toggle`, `switch`, `checkbox`, `slider`, `button`, `status`.
 
 ```css
 geo-location::part(button) {
@@ -123,6 +135,7 @@ geo-location::part(button) {
 ```
 src/
 ├── index.html          # Página de demostración
+├── style.css           # Estilos de la página de demostración
 ├── geoLocation.js      # Custom element y lógica
 ├── geoLocation.html    # <template> del componente
 └── geoLocation.css     # Estilos encapsulados

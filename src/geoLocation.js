@@ -103,11 +103,14 @@ class GeoLocation extends HTMLElement {
     if (name === "auto-follow") {
       this._autoFollow = newValue !== null;
 
+      if (this._autoFollow) this._isManual = false;
+
       if (!this._rendered) return;
 
       this._autoToggle.checked = this._autoFollow;
+      this._syncControls();
 
-      if (this._autoFollow && !this._isManual && this._watchedCoords) {
+      if (this._autoFollow && this._watchedCoords) {
         this._renderMap(this._watchedCoords, "Seguimiento automático activado", "watch");
       }
     }
@@ -187,6 +190,7 @@ class GeoLocation extends HTMLElement {
           this._bindEvents();
           this._rendered = true;
           this._autoToggle.checked = this._autoFollow;
+          this._syncControls();
           this._updateMapSource();
         })
         .catch((error) => {
@@ -226,6 +230,12 @@ class GeoLocation extends HTMLElement {
     this._viewButton.addEventListener("click", () => this._handleView());
   }
 
+  _syncControls() {
+    const disabled = this._autoFollow;
+    this._latitudeInput.disabled = disabled;
+    this._longitudeInput.disabled = disabled;
+  }
+
   async _applyStyles() {
     if ("adoptedStyleSheets" in this.shadowRoot) {
       try {
@@ -247,7 +257,6 @@ class GeoLocation extends HTMLElement {
 
   _startWatch() {
     if (this._watchId !== null) return;
-
     if (!("geolocation" in navigator)) {
       this._viewButton.disabled = true;
       const message = "La geolocalización no está disponible en este navegador";
