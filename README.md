@@ -4,17 +4,18 @@ Componente web (`<geo-location>`) que obtiene la ubicación del usuario con la [
 
 ## Características
 
-- Custom element autocontenido (`geoLocation.js` + `geoLocation.html` + `geoLocation.css`).
+- Custom element autocontenido (`geoLocation.js` + `geoLocation.html`); el CSS base viaja embebido en el JS.
 - Seguimiento continuo de la ubicación con `navigator.geolocation.watchPosition`.
 - Toggle de seguimiento automático (desactivado por defecto); al activarlo, los inputs de coordenadas se deshabilitan.
 - Entrada manual de longitud y latitud con validación de rangos.
 - Prevención de re-renders cuando la ubicación no cambió.
 - API pública: atributos, métodos, eventos, slots y `::part`.
-- Estilos encapsulados con `adoptedStyleSheets` y personalizables con variables CSS.
+- Estilos base embebidos, aplicados con `adoptedStyleSheets` (con fallback a `<style>`) y personalizables con variables CSS, `::part` o hojas de override.
+- API `stylesheets` para inyectar hojas de override sin tocar el componente.
 
 ## Requisitos
 
-- Navegador moderno con soporte de Web Components, `adoptedStyleSheets` y Geolocation API.
+- Navegador moderno con soporte de Web Components y Geolocation API. Las hojas construibles (`adoptedStyleSheets`) se usan si están disponibles; si no, la base y los overrides se aplican con `<style>`.
 - Contexto seguro: `http://localhost` o HTTPS. La geolocalización **no funciona** en `file://`.
 - Conexión a internet para cargar el iframe de Google Maps.
 
@@ -122,7 +123,7 @@ geo-location {
 }
 ```
 
-Partes expuestas con `::part`: `card`, `header`, `title`, `icon`, `badge`, `map`, `map-iframe`, `placeholder`, `radar`, `coords`, `field`, `label`, `input`, `toggle`, `switch`, `checkbox`, `slider`, `button`, `status`.
+Partes expuestas con `::part`: `card`, `header`, `title`, `icon`, `badge`, `map`, `map-iframe`, `placeholder`, `coords`, `field`, `label`, `input`, `toggle`, `switch`, `checkbox`, `slider`, `button`, `status`.
 
 ```css
 geo-location::part(button) {
@@ -130,15 +131,48 @@ geo-location::part(button) {
 }
 ```
 
+### Sobrescribir estilos con hojas
+
+Además de las variables y `::part`, puedes aportar una o varias hojas completas. Se adoptan **después** de la base, así que sus reglas ganan la cascada.
+
+```js
+const theme = new CSSStyleSheet();
+theme.replaceSync(`
+  .card { background: #0b1220; border-color: #1e293b; }
+  .btn  { background: #2563eb; }
+`);
+
+const geo = document.querySelector("geo-location");
+geo.stylesheets = theme;                       // una hoja
+// geo.stylesheets = [theme, otraHoja];        // varias
+// geo.stylesheets = ".btn { background: red }"; // string CSS
+// geo.stylesheets = [];                       // restaurar la base
+```
+
+Orden de la cascada dentro del shadow root, de mayor a menor prioridad:
+
+1. Reglas **sin capa** de tus hojas (lo habitual para overrides).
+2. `@layer geo.overrides`.
+3. `@layer geo.base` (la base del componente).
+
+La base está envuelta en `@layer geo.base`, por lo que un override sin capa gana aunque el selector base sea más específico. Evita `!important`: invierte el orden de las capas y puede impedir el override.
+
+Notas:
+
+- Acepta `CSSStyleSheet`, string CSS o un array de ambos.
+- Las hojas construidas con `new CSSStyleSheet()` son las más eficientes y se pueden compartir entre instancias.
+- Una hoja compartida que mutes después afecta a todas las instancias que la adoptaron.
+- En navegadores sin hojas construibles, los strings se aplican con un `<style>` interno.
+- `replaceSync` no admite `@import`; usa `replace()` o una hoja ya construida.
+
 ## Estructura del proyecto
 
 ```
 src/
 ├── index.html          # Página de demostración
 ├── style.css           # Estilos de la página de demostración
-├── geoLocation.js      # Custom element y lógica
-├── geoLocation.html    # <template> del componente
-└── geoLocation.css     # Estilos encapsulados
+├── geoLocation.js      # Custom element, lógica y estilos base
+└── geoLocation.html    # <template> del componente
 ```
 
 ## Notas
